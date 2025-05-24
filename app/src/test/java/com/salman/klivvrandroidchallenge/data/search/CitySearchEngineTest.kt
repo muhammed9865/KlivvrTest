@@ -115,5 +115,15 @@ class CitySearchEngineTest {
         val result = searchEngine.search(cities, "   ")
         assertEquals(cities.map { it.name }, result.map { it.name })
     }
+
+    @Test
+    fun `search with redundant names returns all`() {
+        val redundantCities = listOf(
+            CityItem(1, "Sydney", "AU", ImageResource.Res(0), Coordinates(0.0, 0.0)),
+            CityItem(2, "Sydney", "AU", ImageResource.Res(0), Coordinates(0.0, 0.0)),
+        )
+        val result = searchEngine.search(redundantCities, "Sydney")
+        assertEquals(redundantCities.map { it.name }, result.map { it.name })
+    }
 }
 
