@@ -1,4 +1,4 @@
-package com.salman.klivvrandroidchallenge.ui.theme
+package com.salman.klivvrandroidchallenge.presentation.theme
 
 import android.app.Activity
 import android.os.Build

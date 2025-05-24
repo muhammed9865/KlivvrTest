@@ -1,4 +1,4 @@
-package com.salman.klivvrandroidchallenge.ui.theme
+package com.salman.klivvrandroidchallenge.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
