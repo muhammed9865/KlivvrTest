@@ -26,5 +26,5 @@ interface CityRepository {
      * Searches for cities based on the provided [query].
      * Efficient search that uses the [CityItem.searchKey] of each city.
      */
-    suspend fun searchCities(query: String): LoadState<List<CityItem>>
+    suspend fun searchCities(query: String): List<CityItem>
 }
