@@ -37,7 +37,8 @@ class CityRepositoryImpl @Inject constructor(
             val cities = citiesResult.dataOrNull()!!.map {
                 it.toDomain(countryImageSource.getCountryImage(it.country))
             }
-            citiesState.update { LoadState.Success(cities) }
+            val citiesSorted = cities.sortedBy { it.searchKey }
+            citiesState.update { LoadState.Success(citiesSorted) }
         }
 
         if (citiesResult.isError()) {
