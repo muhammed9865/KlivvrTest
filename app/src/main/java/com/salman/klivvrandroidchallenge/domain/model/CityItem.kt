@@ -14,5 +14,7 @@ data class CityItem(
     val country: String,
     val image: ImageResource,
     val coordinates: Coordinates,
-    val searchKey: String,
-)
+) {
+    val searchKey: String
+        get() = "${name.lowercase()}, ${country.lowercase()}"
+}
