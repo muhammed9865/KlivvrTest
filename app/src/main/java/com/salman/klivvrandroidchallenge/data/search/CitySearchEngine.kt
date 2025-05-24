@@ -15,49 +15,52 @@ import com.salman.klivvrandroidchallenge.domain.model.CityItem
 class CitySearchEngine: SearchEngine<CityItem> {
 
     override fun search(items: List<CityItem>, query: String): List<CityItem> {
+        if (query.isBlank()) return items
         val searchKeys = items.map { it.searchKey }
-        val resultFirstIndex = searchKeys.binarySearch(query, findFirstItem = true)
-        val resultLastIndex = searchKeys.binarySearch(query, findFirstItem = false)
-        return if (resultFirstIndex == -1 || resultLastIndex == -1) {
-            emptyList()
-        } else {
-            items.subList(resultFirstIndex, resultLastIndex + 1)
-        }
+        val firstIndex = searchKeys.lowerBound(query)
+        if (firstIndex == -1) return emptyList()
+        val lastIndex = searchKeys.upperBound(query, firstIndex)
+        return items.subList(firstIndex, lastIndex)
     }
 
     /**
-     * Iterates through the list in a non-linear way (Binary search).
-     *
-     * It finds either the very first or the very last item that matches the query.
-     *
-     * @param query The query to search for.
-     * @param findFirstItem If true, it finds the first item that matches the query.
-     * If false, it finds the last item that matches the query.
-     *
-     * @return The index of the item that matches the query.
-     * If not found, returns -1.
+     * Finds the first index where the prefix could match (lower bound).
+     * Returns -1 if no such index exists.
      */
-    private fun List<String>.binarySearch(query: String, findFirstItem: Boolean): Int {
+    private fun List<String>.lowerBound(prefix: String): Int {
         var low = 0
         var high = lastIndex
         var result = -1
         while (low <= high) {
             val mid = (low + high) / 2
             val midValue = this[mid]
-
-            if (midValue == query) {
+            if (midValue.regionMatches(0, prefix, 0, prefix.length, ignoreCase = true)) {
                 result = mid
-                if (findFirstItem) {
-                    high = mid - 1 // move left to find the first occurrence
-                } else {
-                    low = mid + 1 // move right to find the last occurrence
-                }
-            } else if (midValue < query) {
-                low = mid + 1 // Search in the right half
+                high = mid - 1 // look for earlier match
+            } else if (midValue.compareTo(prefix, ignoreCase = true) < 0) {
+                low = mid + 1
             } else {
-                high = mid - 1 // Search in the left half
+                high = mid - 1
             }
         }
         return result
+    }
+
+    /**
+     * Finds the first index where the prefix no longer matches (upper bound), starting from lowerBound.
+     * Returns items.size if all remaining items match.
+     */
+    private fun List<String>.upperBound(prefix: String, start: Int): Int {
+        var low = start
+        var high = size
+        while (low < high) {
+            val mid = (low + high) / 2
+            if (mid < size && this[mid].startsWith(prefix, ignoreCase = true)) {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        }
+        return low
     }
 }
