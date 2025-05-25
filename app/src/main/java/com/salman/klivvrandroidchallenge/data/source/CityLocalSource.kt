@@ -7,7 +7,9 @@ import com.salman.klivvrandroidchallenge.domain.model.LoadState
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import javax.inject.Inject
 
 /**
@@ -22,14 +24,13 @@ class CityLocalSource @Inject constructor(
         private const val CITIES_FILE_NAME = "cities.json"
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     suspend fun getCities(): LoadState<List<CityEntity>> {
         return withContext(Dispatchers.IO) {
             try {
-                val citiesJson =  context.assets.open(CITIES_FILE_NAME)
-                    .bufferedReader()
-                    .use { it.readText() }
+                val citiesStream = context.assets.open(CITIES_FILE_NAME).buffered()
+                val cities = serializer.decodeFromStream<List<CityEntity>>(citiesStream)
 
-                val cities = serializer.decodeFromString<List<CityEntity>>(citiesJson)
                 LoadState.Success(cities)
             } catch (ex: Exception) {
                 LoadState.Error(context.getString(R.string.something_went_wrong), ex)
