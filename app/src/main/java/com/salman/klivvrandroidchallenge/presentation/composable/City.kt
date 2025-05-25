@@ -88,12 +88,14 @@ private fun CityDetails(item: CityItem, modifier: Modifier = Modifier) {
     ) {
         Text(
             text = "${item.name}, ${item.country}",
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(8.dp))
         Text(
             text = item.coordinatesString,
             style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
     }
 }
