@@ -63,7 +63,7 @@ private fun CountryImage(
 ) {
     Box(
         modifier = modifier
-            .fillMaxWidth(0.25f)
+            .width(84.dp)
             .aspectRatio(1f)
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.background)
@@ -98,9 +98,35 @@ private fun CityDetails(item: CityItem, modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO)
+@Preview(
+    showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_NO,
+)
 @Composable
 private fun CityCardPreview() {
+    KlivvrAndroidChallengeTheme {
+        CityCard(
+            item = CityItem(
+                id = 1,
+                name = "Cairo",
+                country = "EG",
+                image = ImageResource.Res(R.drawable.flag_ad),
+                coordinates = Coordinates(
+                    30.0444,
+                    31.2357
+                ),
+            ),
+        ) {
+
+        }
+    }
+}
+
+@Preview(
+    showBackground = true, uiMode = Configuration.ORIENTATION_LANDSCAPE,
+    widthDp = 840
+)
+@Composable
+private fun CityCardLandscapePreview() {
     KlivvrAndroidChallengeTheme {
         CityCard(
             item = CityItem(
