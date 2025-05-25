@@ -42,6 +42,20 @@ import com.salman.klivvrandroidchallenge.presentation.model.TimelineScrollPositi
  * Created by Muhammed Salman email(mahmadslman@gmail.com) on 5/24/2025.
  */
 
+/**
+ * Syncs the scroll position of a LazyListState or LazyGridState
+ * based on the current orientation.
+ *
+ * This composable will restore the scroll position
+ * when the orientation changes and will store the current
+ * scroll position on every scroll event.
+ *
+ * @param isPortrait Boolean indicating if the current orientation is portrait.
+ * @param lazyListState The LazyListState to sync when in portrait mode.
+ * @param lazyGridState The LazyGridState to sync when in landscape mode.
+ * @param scrollPosition The current scroll position to restore.
+ * @param onScrollChanged Callback to notify when the scroll position changes.
+ */
 @Composable
 fun ScrollPositionSync(
     isPortrait: Boolean,
