@@ -26,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -108,19 +107,7 @@ fun CityTimelineList(
     scrollPosition: TimelineScrollPosition = TimelineScrollPosition(),
     onScrollChanged: (TimelineScrollPosition) -> Unit = {}
 ) {
-    val lastItem = remember(groups.size) {
-        if (isPortrait) {
-            groups.lastOrNull()?.cities?.lastOrNull()
-        } else {
-            groups.lastOrNull()?.cities?.let { cities ->
-                if (cities.size > 1) {
-                    cities[cities.size - 2] // Get the second last item
-                } else {
-                    cities.lastOrNull() // Fallback to last item if only one exists
-                }
-            }
-        }
-    }
+    val lastItem = groups.getLastItem(isPortrait)
 
     // Use the scroll position sync helper
     ScrollPositionSync(
@@ -318,6 +305,25 @@ fun TimelineIndicator(
             )
         }
 
+    }
+}
+
+private fun List<GroupOfCity>.getLastItem(isPortrait: Boolean): CityItem? {
+    if (isEmpty()) return null
+    if (isPortrait) {
+        return last().cities.last()
+    }
+
+    return when (val size = last().cities.size) {
+        0 -> null
+        1 -> last().cities.first()
+        else -> {
+            if (size % 2 == 0) {
+                last().cities[size - 2] // Get the second last item
+            } else {
+                last().cities.lastOrNull() // Fallback to last item if only one exists
+            }
+        }
     }
 }
 
