@@ -1,11 +1,15 @@
 package com.salman.klivvrandroidchallenge.presentation.screen
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.salman.klivvrandroidchallenge.domain.model.CityItem
 import com.salman.klivvrandroidchallenge.domain.model.LoadState
 import com.salman.klivvrandroidchallenge.domain.repository.CityRepository
 import com.salman.klivvrandroidchallenge.domain.usecase.GroupCitiesByCharacterUseCase
+import com.salman.klivvrandroidchallenge.presentation.model.TimelineScrollPosition
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -32,6 +36,14 @@ class HomeViewModel @Inject constructor(
     val state = mutableState.asStateFlow()
 
     private val searchFlow = MutableStateFlow<String?>(null)
+
+    /**
+     * Stores the scroll positions of the [HomeState.groupOfCities]
+     *
+     * Stored in ViewModel to survive configuration changes
+     */
+    var timelineScrollPosition by mutableStateOf(TimelineScrollPosition())
+        private set
 
     init {
         observeCities()
@@ -60,6 +72,9 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun updateTimelineScrollPosition(position: TimelineScrollPosition) {
+        timelineScrollPosition = position
+    }
 
     private fun observeCities() = viewModelScope.launch {
         cityRepository.loadCityState
@@ -95,3 +110,4 @@ class HomeViewModel @Inject constructor(
         }
     }
 }
+
