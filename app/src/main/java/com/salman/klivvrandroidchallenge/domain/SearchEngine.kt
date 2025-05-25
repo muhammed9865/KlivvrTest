@@ -7,5 +7,5 @@ package com.salman.klivvrandroidchallenge.domain
  */
 interface SearchEngine<T> {
 
-    fun search(items: List<T>, query: String): List<T>
+    suspend fun search(items: List<T>, query: String): List<T>
 }

@@ -2,6 +2,8 @@ package com.salman.klivvrandroidchallenge.data.search
 
 import com.salman.klivvrandroidchallenge.domain.SearchEngine
 import com.salman.klivvrandroidchallenge.domain.model.CityItem
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 /**
  * Created by Muhammed Salman email(mahmadslman@gmail.com) on 5/23/2025.
@@ -12,32 +14,34 @@ import com.salman.klivvrandroidchallenge.domain.model.CityItem
  * The input items must be sorted using the same key.
  * Otherwise, the search result will be incorrect.
  */
-class CitySearchEngine: SearchEngine<CityItem> {
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.coroutineContext
 
-    override fun search(items: List<CityItem>, query: String): List<CityItem> {
-        if (query.isBlank()) return items
-        val searchKeys = items.map { it.searchKey }
-        val firstIndex = searchKeys.lowerBound(query)
-        if (firstIndex == -1) return emptyList()
-        val lastIndex = searchKeys.upperBound(query, firstIndex)
-        return items.subList(firstIndex, lastIndex)
+class CitySearchEngine : SearchEngine<CityItem> {
+
+    override suspend fun search(items: List<CityItem>, query: String): List<CityItem> = withContext(coroutineContext) {
+        if (query.isBlank()) return@withContext items
+
+        val firstIndex = items.lowerBound(query)
+        if (firstIndex == -1) return@withContext emptyList()
+
+        val lastIndex = items.upperBound(query, firstIndex)
+
+        return@withContext items.subList(firstIndex, lastIndex)
     }
 
-    /**
-     * Finds the first index where the prefix could match (lower bound).
-     * Returns -1 if no such index exists.
-     */
-    private fun List<String>.lowerBound(prefix: String): Int {
+    private fun List<CityItem>.lowerBound(prefix: String): Int {
         var low = 0
         var high = lastIndex
         var result = -1
         while (low <= high) {
             val mid = (low + high) / 2
             val midValue = this[mid]
-            if (midValue.regionMatches(0, prefix, 0, prefix.length, ignoreCase = true)) {
+
+            if (midValue.searchKey.regionMatches(0, prefix, 0, prefix.length, ignoreCase = true)) {
                 result = mid
-                high = mid - 1 // look for earlier match
-            } else if (midValue.compareTo(prefix, ignoreCase = true) < 0) {
+                high = mid - 1
+            } else if (midValue.searchKey.compareTo(prefix, ignoreCase = true) < 0) {
                 low = mid + 1
             } else {
                 high = mid - 1
@@ -46,16 +50,12 @@ class CitySearchEngine: SearchEngine<CityItem> {
         return result
     }
 
-    /**
-     * Finds the first index where the prefix no longer matches (upper bound), starting from lowerBound.
-     * Returns items.size if all remaining items match.
-     */
-    private fun List<String>.upperBound(prefix: String, start: Int): Int {
+    private fun List<CityItem>.upperBound(prefix: String, start: Int): Int {
         var low = start
         var high = size
         while (low < high) {
             val mid = (low + high) / 2
-            if (mid < size && this[mid].startsWith(prefix, ignoreCase = true)) {
+            if (mid < size && this[mid].searchKey.startsWith(prefix, ignoreCase = true)) {
                 low = mid + 1
             } else {
                 high = mid
