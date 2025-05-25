@@ -1,5 +1,6 @@
 package com.salman.klivvrandroidchallenge.presentation
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -7,10 +8,10 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.salman.klivvrandroidchallenge.R
 import com.salman.klivvrandroidchallenge.domain.model.CityItem
@@ -21,6 +22,7 @@ import com.salman.klivvrandroidchallenge.presentation.theme.KlivvrAndroidChallen
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 class MainActivity : ComponentActivity() {
 
     private val viewModel by viewModels<MainViewModel>()
@@ -31,16 +33,16 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val isDarkMode = viewModel.isDarkMode.collectAsStateWithLifecycle()
+            updateSystemBarsAppearance(isNightMode = isDarkMode.value)
             KlivvrAndroidChallengeTheme(
                 darkTheme = isDarkMode.value
             ) {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                ) { innerPadding ->
+                ) {
                     HomeScreen(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding),
+                            .fillMaxSize(),
                         isNightMode = isDarkMode.value,
                         onToggleNightMode = viewModel::toggleDarkMode
                     ) { cityItem, mapAction ->
@@ -49,6 +51,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private fun updateSystemBarsAppearance(isNightMode: Boolean) {
+        val insetsController = WindowInsetsControllerCompat(window, window.decorView)
+        insetsController.isAppearanceLightNavigationBars = !isNightMode
+        insetsController.isAppearanceLightStatusBars = !isNightMode
     }
 
 
