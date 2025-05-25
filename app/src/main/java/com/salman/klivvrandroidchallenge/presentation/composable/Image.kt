@@ -2,6 +2,7 @@ package com.salman.klivvrandroidchallenge.presentation.composable
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.salman.klivvrandroidchallenge.domain.model.ImageResource
 import androidx.compose.foundation.Image as ComposeImage
@@ -17,6 +18,7 @@ import androidx.compose.foundation.Image as ComposeImage
 fun Image(
     modifier: Modifier = Modifier,
     resource: ImageResource,
+    contentScale: ContentScale = ContentScale.Fit,
     contentDescription: String? = null
 ) {
 
@@ -26,6 +28,7 @@ fun Image(
                  modifier = modifier,
                  painter = painterResource(resource.resId),
                  contentDescription = contentDescription,
+                 contentScale = contentScale
              )
          }
     }
