@@ -1,5 +1,7 @@
 package com.salman.klivvrandroidchallenge.domain.model
 
+import androidx.compose.runtime.Stable
+
 /**
  * Created by Muhammed Salman email(mahmadslman@gmail.com) on 5/23/2025.
  *
@@ -7,7 +9,9 @@ package com.salman.klivvrandroidchallenge.domain.model
  *
  * Notes
  * - [searchKey] is used to sort and search the list of cities.
+ * - [image] is a preloaded [ImageResource] that can be used in the UI.
  */
+@Stable
 data class CityItem(
     val id: Int,
     val name: String,
@@ -16,5 +20,8 @@ data class CityItem(
     val coordinates: Coordinates,
 ) {
     val searchKey: String
-        get() = "${name.lowercase()}, ${country.lowercase()}"
+        get() = "${name.lowercase()} ${country.lowercase()}"
+
+    val coordinatesString: String
+        get() = "${coordinates.latitude}, ${coordinates.longitude}"
 }

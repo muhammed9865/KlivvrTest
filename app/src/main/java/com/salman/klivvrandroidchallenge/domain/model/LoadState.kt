@@ -54,6 +54,17 @@ sealed class LoadState<out T> {
         return this
     }
 
+    fun <R> map(
+        transform: (T) -> R
+    ): LoadState<R> {
+        return when (this) {
+            is Loading -> Loading
+            is Idle -> Idle
+            is Success -> Success(transform(data), code)
+            is Error -> Error(message, throwable)
+        }
+    }
+
     inline fun onLoading(action: () -> Unit): LoadState<T> {
         if (this is Loading) {
             action()
