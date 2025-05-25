@@ -8,6 +8,8 @@
     <string name="search_for_cities">Search for cities</string>
     <string name="city_search">City Search</string>
     <string name="error_no_maps_app">Sorry! But Google maps is not installed</string>
+    <string name="open_map">Display On Map</string>
+    <string name="navigate_to_coordinates">Navigate to location</string>
 
     <plurals name="cities_count">
         <item quantity="one">%1$s city</item>

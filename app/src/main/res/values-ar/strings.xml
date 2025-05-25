@@ -9,6 +9,8 @@
     <string name="search_for_cities">ابحث عن المدن</string>
     <string name="city_search">بحث عن مدينة</string>
     <string name="error_no_maps_app">المعذرة! ولكن خرائط جوجل غير مثبته</string>
+    <string name="open_map">العرض على الخريطة</string>
+    <string name="navigate_to_coordinates">التوجه للموقع</string>
 
     <plurals name="cities_count">
         <item quantity="one">%1$s مدينة</item>
