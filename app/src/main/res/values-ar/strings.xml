@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">تحدي كليففر أندرويد</string>
+    <string name="something_went_wrong">حدث خطأ ما</string>
+    <string name="search">بحث…</string>
+    <string name="loading">جارٍ التحميل…</string>
+    <string name="failed_to_load_cities">فشل في تحميل المدن</string>
+    <string name="cities">%1$s مدينة</string>
+    <string name="search_for_cities">ابحث عن المدن</string>
+    <string name="city_search">بحث عن مدينة</string>
+    <string name="error_no_maps_app">المعذرة! ولكن خرائط جوجل غير مثبته</string>
+
+    <plurals name="cities_count">
+        <item quantity="one">%1$s مدينة</item>
+        <item quantity="other">%1$s مدن</item>
+        <item quantity="few">%1$s مدن</item>
+        <item quantity="many">%1$s مدينة</item>
+        <item quantity="zero">لا توجد مدن</item>
+        <item quantity="two">مدينتان</item>
+    </plurals>
+</resources>
