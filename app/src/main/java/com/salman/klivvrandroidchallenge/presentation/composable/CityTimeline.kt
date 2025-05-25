@@ -13,16 +13,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,10 +36,52 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.salman.klivvrandroidchallenge.domain.model.CityItem
 import com.salman.klivvrandroidchallenge.domain.model.GroupOfCity
+import com.salman.klivvrandroidchallenge.presentation.model.TimelineScrollPosition
 
 /**
  * Created by Muhammed Salman email(mahmadslman@gmail.com) on 5/24/2025.
  */
+
+@Composable
+fun ScrollPositionSync(
+    isPortrait: Boolean,
+    lazyListState: LazyListState,
+    lazyGridState: LazyGridState,
+    scrollPosition: TimelineScrollPosition = TimelineScrollPosition(),
+    onScrollChanged: (TimelineScrollPosition) -> Unit = {}
+) {
+    // Restore scroll position on first composition
+    LaunchedEffect(isPortrait) {
+        if (isPortrait) {
+            lazyListState.scrollToItem(scrollPosition.listIndex, scrollPosition.listOffset)
+        } else {
+            lazyGridState.scrollToItem(scrollPosition.listIndex, scrollPosition.listOffset)
+        }
+    }
+
+    // Store the scroll positions on orientation change
+    DisposableEffect(isPortrait) {
+        onDispose {
+            if (isPortrait) {
+                onScrollChanged(
+                    scrollPosition.copy(
+                        listIndex = lazyListState.firstVisibleItemIndex,
+                        listOffset = lazyListState.firstVisibleItemScrollOffset
+                    )
+                )
+            } else {
+                onScrollChanged(
+                    scrollPosition.copy(
+                        listIndex = lazyGridState.firstVisibleItemIndex,
+                        listOffset = lazyGridState.firstVisibleItemScrollOffset
+                    )
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CityTimelineList(
     modifier: Modifier = Modifier,
@@ -46,13 +90,14 @@ fun CityTimelineList(
     lazyGridState: LazyGridState = rememberLazyGridState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
     isPortrait: Boolean = LocalConfiguration.current.orientation == Configuration.ORIENTATION_PORTRAIT,
-    onCityClick: (CityItem) -> Unit
+    onCityClick: (CityItem) -> Unit,
+    scrollPosition: TimelineScrollPosition = TimelineScrollPosition(),
+    onScrollChanged: (TimelineScrollPosition) -> Unit = {}
 ) {
-    val lastItem = remember(groups) {
+    val lastItem = remember(groups.size) {
         if (isPortrait) {
             groups.lastOrNull()?.cities?.lastOrNull()
         } else {
-            // In landscape, we consider the item before the last item in the last group
             groups.lastOrNull()?.cities?.let { cities ->
                 if (cities.size > 1) {
                     cities[cities.size - 2] // Get the second last item
@@ -63,10 +108,14 @@ fun CityTimelineList(
         }
     }
 
-    LaunchedEffect(groups.size) {
-        lazyListState.animateScrollToItem(0)
-        lazyGridState.animateScrollToItem(0)
-    }
+    // Use the scroll position sync helper
+    ScrollPositionSync(
+        isPortrait = isPortrait,
+        lazyListState = lazyListState,
+        lazyGridState = lazyGridState,
+        scrollPosition = scrollPosition,
+        onScrollChanged = onScrollChanged
+    )
 
     if (isPortrait) {
         PortraitTimelineList(
@@ -105,7 +154,9 @@ private fun PortraitTimelineList(
     ) {
         groups.forEach { group ->
             stickyHeader {
-                TimelineRowHeader(character = group.startsByCharacter)
+                TimelineRowHeader(
+                    character = group.startsByCharacter
+                )
             }
             itemsIndexed(group.cities, key = { _, item -> item.id }) { _, city ->
                 TimelineRowItem(
@@ -152,10 +203,13 @@ private fun LandscapeTimelineGrid(
 }
 
 @Composable
-fun TimelineRowHeader(character: Char) {
+fun TimelineRowHeader(
+    modifier: Modifier = Modifier,
+    character: Char
+) {
     Column {
         Box(
-            Modifier
+            modifier
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surface)
                 .border(2.dp, MaterialTheme.colorScheme.outline, CircleShape)
@@ -201,7 +255,9 @@ fun TimelineRowItem(
         val cardPaddingModifier = if (isPortrait) {
             Modifier.padding(vertical = 8.dp)
         } else {
-            Modifier.padding(start = 24.dp).padding(vertical = 8.dp)
+            Modifier
+                .padding(start = 24.dp)
+                .padding(vertical = 8.dp)
         }
         CityCard(
             modifier = Modifier
@@ -250,6 +306,4 @@ fun TimelineIndicator(
 
     }
 }
-
-
 
