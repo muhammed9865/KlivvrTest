@@ -1,6 +1,7 @@
 package com.salman.klivvrandroidchallenge.presentation.screen
 
 import androidx.compose.runtime.Stable
+import com.salman.klivvrandroidchallenge.domain.model.CityItem
 import com.salman.klivvrandroidchallenge.domain.model.LoadState
 import com.salman.klivvrandroidchallenge.domain.model.GroupOfCity
 
@@ -12,5 +13,9 @@ data class HomeState(
     val searchQuery: String? = null,
     val groupOfCities: LoadState<List<GroupOfCity>> = LoadState.Loading,
     val citiesCount: LoadState<Int> = LoadState.Loading,
-    val isSearchBarExpanded: Boolean = false
-)
+    val isSearchBarExpanded: Boolean = false,
+    val showCityItemMapActions: CityItem? = null
+) {
+    val showBottomSheet: Boolean
+        get() = showCityItemMapActions != null
+}

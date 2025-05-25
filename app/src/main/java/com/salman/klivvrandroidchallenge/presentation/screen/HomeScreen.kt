@@ -9,9 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,19 +30,23 @@ import com.salman.klivvrandroidchallenge.R
 import com.salman.klivvrandroidchallenge.domain.model.CityItem
 import com.salman.klivvrandroidchallenge.domain.model.LoadState
 import com.salman.klivvrandroidchallenge.presentation.composable.CityTimelineList
+import com.salman.klivvrandroidchallenge.presentation.composable.MapActionsSheet
 import com.salman.klivvrandroidchallenge.presentation.composable.SearchBar
+import com.salman.klivvrandroidchallenge.presentation.map.MapAction
 
 /**
  * Created by Muhammed Salman email(mahmadslman@gmail.com) on 5/24/2025.
  */
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
-    onOpenCityDetails: (CityItem) -> Unit = {}
+    onOpenCityDetails: (CityItem, MapAction) -> Unit = { _, _ -> }
 ) {
     val state = viewModel.state.collectAsStateWithLifecycle()
+    val bottomSheetState = rememberModalBottomSheetState()
     HomeContent(
         modifier
             .fillMaxSize()
@@ -46,8 +54,16 @@ fun HomeScreen(
         state = state.value,
         onQueryChanged = viewModel::onSearchQueryChanged,
         onSearchBarExpanded = viewModel::onSearchBarExpanded,
-        onOpenCityDetails = onOpenCityDetails
+        onOpenCityDetails = viewModel::openMapActionsFor
     )
+    if (state.value.showCityItemMapActions != null) {
+        MapActionsSheet(
+            onDismiss = viewModel::hideMapActions,
+            cityItem = state.value.showCityItemMapActions,
+            sheetState = bottomSheetState,
+            onAction = onOpenCityDetails
+        )
+    }
 }
 
 @Composable

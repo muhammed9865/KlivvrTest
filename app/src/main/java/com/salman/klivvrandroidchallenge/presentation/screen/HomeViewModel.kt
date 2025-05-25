@@ -48,6 +48,18 @@ class HomeViewModel @Inject constructor(
         mutableState.update { it.copy(isSearchBarExpanded = isExpanded) }
     }
 
+    fun openMapActionsFor(cityItem: CityItem) {
+        mutableState.update {
+            it.copy(showCityItemMapActions = cityItem)
+        }
+    }
+
+    fun hideMapActions() {
+        mutableState.update {
+            it.copy(showCityItemMapActions = null)
+        }
+    }
+
 
     private fun observeCities() = viewModelScope.launch {
         cityRepository.loadCityState
