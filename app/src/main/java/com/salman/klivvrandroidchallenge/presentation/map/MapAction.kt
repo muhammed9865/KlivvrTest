@@ -13,10 +13,10 @@ enum class MapAction(
 ) {
     OPEN_MAP(
         titleResId = R.string.open_map,
-        iconResId = R.drawable.map_icon
+        iconResId = R.drawable.baseline_map_24
     ),
     NAVIGATE_TO_COORDINATES(
         titleResId = R.string.navigate_to_coordinates,
-        iconResId = R.drawable.car_icon
+        iconResId = R.drawable.rounded_alt_route_24
     )
 }
