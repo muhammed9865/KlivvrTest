@@ -6,11 +6,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -18,6 +20,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -29,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -46,12 +48,12 @@ import com.salman.klivvrandroidchallenge.presentation.composable.NightModeSwitch
 import com.salman.klivvrandroidchallenge.presentation.composable.SearchBar
 import com.salman.klivvrandroidchallenge.presentation.isPortraitMode
 import com.salman.klivvrandroidchallenge.presentation.map.MapAction
+import com.salman.klivvrandroidchallenge.presentation.model.TimelineScrollPosition
 import com.salman.klivvrandroidchallenge.presentation.theme.KlivvrAndroidChallengeTheme
 
 /**
- * Created by Muhammed Salman email(mahmadslman@gmail.com) on 5/24/2025.
+ * Created by Muhammed Salman email(mahmadslman@gmail.com) on 5/25/2025.
  */
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -73,6 +75,8 @@ fun HomeScreen(
         onSearchBarExpanded = viewModel::onSearchBarExpanded,
         onOpenCityDetails = viewModel::openMapActionsFor,
         onToggleNightMode = onToggleNightMode,
+        timelineScrollPosition = viewModel.timelineScrollPosition,
+        onTimelineScrollChanged = viewModel::updateTimelineScrollPosition
     )
     if (state.value.showCityItemMapActions != null) {
         MapActionsSheet(
@@ -92,10 +96,12 @@ private fun HomeContent(
     isPortrait: Boolean = isPortraitMode(),
     lazyListState: LazyListState = rememberLazyListState(),
     lazyGridState: LazyGridState = rememberLazyGridState(),
+    timelineScrollPosition: TimelineScrollPosition = TimelineScrollPosition(),
     onOpenCityDetails: (CityItem) -> Unit = {},
     onQueryChanged: (String) -> Unit = {},
     onSearchBarExpanded: (Boolean) -> Unit = {},
-    onToggleNightMode: () -> Unit = {}
+    onToggleNightMode: () -> Unit = {},
+    onTimelineScrollChanged: (TimelineScrollPosition) -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     val isScrolling by remember {
@@ -107,62 +113,66 @@ private fun HomeContent(
         targetValue = if (isScrolling) 0.5f else 1f,
         label = "searchBarAlpha"
     )
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .clickable(enabled = state.isSearchBarExpanded) {
-                focusManager.clearFocus(force = true)
-            },
-        contentAlignment = Alignment.Center
-    ) {
-        var searchBarHeight by remember { mutableStateOf(0.dp) }
-        var topBarHeight by remember { mutableStateOf(0.dp) }
-        state.groupOfCities
-            .onLoading {
-                LoadingCities(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+    Scaffold(
+        modifier = modifier,
+        bottomBar = {
+            SearchBar(
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .alpha(animatedSearchBarAlpha),
+                query = state.searchQuery,
+                isExpanded = state.isSearchBarExpanded,
+                onQueryChanged = onQueryChanged,
+                onExpandedChange = onSearchBarExpanded
+            )
+        },
+        content = { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(enabled = state.isSearchBarExpanded) {
+                        focusManager.clearFocus(force = true)
+                    },
+                verticalArrangement = Arrangement.Center
+            ) {
+                TopBar(
+                    modifier = Modifier.statusBarsPadding(),
+                    countState = state.citiesCount,
+                    isNightMode = isNightMode,
+                    onToggleNightMode = onToggleNightMode
                 )
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth(), contentAlignment = Alignment.Center
+                ) {
+                    state.groupOfCities
+                        .onLoading {
+                            LoadingCities(
+                                modifier = Modifier
+                                    .fillMaxWidth(0.7f)
+                                    .align(Alignment.Center)
+                            )
+                        }
+                        .onData {
+                            CityTimelineList(
+                                modifier = Modifier.padding(
+                                    horizontal = 16.dp,
+                                ),
+                                groups = it,
+                                lazyListState = lazyListState,
+                                lazyGridState = lazyGridState,
+                                onCityClick = onOpenCityDetails,
+                                isPortrait = isPortrait,
+                                contentPadding = innerPadding,
+                                scrollPosition = timelineScrollPosition,
+                                onScrollChanged = onTimelineScrollChanged
+                            )
+                        }
+                }
             }
-            .onData {
-                CityTimelineList(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    groups = it,
-                    lazyListState = lazyListState,
-                    lazyGridState = lazyGridState,
-                    onCityClick = onOpenCityDetails,
-                    contentPadding = PaddingValues(
-                        bottom = searchBarHeight + 16.dp,
-                        top = topBarHeight / 2f
-                    ),
-                    isPortrait = isPortrait
-                )
-            }
-        TopBar(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopStart)
-                .onGloballyPositioned {
-                    topBarHeight = it.size.height.dp
-                },
-            countState = state.citiesCount,
-            isNightMode = isNightMode,
-            onToggleNightMode = onToggleNightMode
-        )
-        SearchBar(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .alpha(animatedSearchBarAlpha)
-                .onGloballyPositioned {
-                    searchBarHeight = it.size.height.dp
-                },
-            query = state.searchQuery,
-            isExpanded = state.isSearchBarExpanded,
-            onQueryChanged = onQueryChanged,
-            onExpandedChange = onSearchBarExpanded
-        )
-    }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -184,7 +194,6 @@ private fun TopBar(
 
         is LoadState.Idle -> stringResource(R.string.search_for_cities)
     }
-
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -219,9 +228,9 @@ private fun LoadingCities(modifier: Modifier = Modifier) {
     LinearProgressIndicator(modifier)
 }
 
-@Preview(name = "HomeScreen Portrait", showBackground = true, widthDp = 360, heightDp = 800)
+@Preview(name = "EnhancedHomeScreen Portrait", showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
-fun PreviewHomeScreenPortrait() {
+fun PreviewEnhancedHomeScreenPortrait() {
     KlivvrAndroidChallengeTheme {
         var expanded by remember { mutableStateOf(false) }
         HomeContent(
@@ -233,9 +242,14 @@ fun PreviewHomeScreenPortrait() {
     }
 }
 
-@Preview(name = "HomeScreen Landscape", showBackground = true, widthDp = 800, heightDp = 360)
+@Preview(
+    name = "EnhancedHomeScreen Landscape",
+    showBackground = true,
+    widthDp = 800,
+    heightDp = 360
+)
 @Composable
-fun PreviewHomeScreenLandscape() {
+fun PreviewEnhancedHomeScreenLandscape() {
     KlivvrAndroidChallengeTheme {
         var expanded by remember { mutableStateOf(false) }
         HomeContent(
@@ -246,3 +260,4 @@ fun PreviewHomeScreenLandscape() {
         )
     }
 }
+
